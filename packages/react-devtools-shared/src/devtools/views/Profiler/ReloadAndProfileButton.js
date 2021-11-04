@@ -16,6 +16,7 @@ import {useSubscription} from '../hooks';
 
 type SubscriptionData = {|
   recordChangeDescriptions: boolean,
+  recordPerfInsights: boolean,
   supportsReloadAndProfile: boolean,
 |};
 
@@ -31,13 +32,16 @@ export default function ReloadAndProfileButton({
     () => ({
       getCurrentValue: () => ({
         recordChangeDescriptions: store.recordChangeDescriptions,
+        recordPerfInsights: store.recordPerfInsights,
         supportsReloadAndProfile: store.supportsReloadAndProfile,
       }),
       subscribe: (callback: Function) => {
         store.addListener('recordChangeDescriptions', callback);
+        store.addListener('recordPerfInsights', callback);
         store.addListener('supportsReloadAndProfile', callback);
         return () => {
           store.removeListener('recordChangeDescriptions', callback);
+          store.removeListener('recordPerfInsights', callback);
           store.removeListener('supportsReloadAndProfile', callback);
         };
       },
@@ -46,6 +50,7 @@ export default function ReloadAndProfileButton({
   );
   const {
     recordChangeDescriptions,
+    recordPerfInsights,
     supportsReloadAndProfile,
   } = useSubscription<SubscriptionData>(subscription);
 
@@ -56,8 +61,11 @@ export default function ReloadAndProfileButton({
     // For now, let's just skip doing it entirely to avoid paying snapshot costs for data we don't need.
     // startProfiling();
 
-    bridge.send('reloadAndProfile', recordChangeDescriptions);
-  }, [bridge, recordChangeDescriptions]);
+    bridge.send('reloadAndProfile', [
+      recordChangeDescriptions,
+      recordPerfInsights,
+    ]);
+  }, [bridge, recordChangeDescriptions, recordPerfInsights]);
 
   if (!supportsReloadAndProfile) {
     return null;

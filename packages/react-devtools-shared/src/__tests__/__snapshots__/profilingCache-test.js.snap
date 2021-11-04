@@ -40,6 +40,7 @@ Object {
     6 => 1,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 16,
   "updaters": Array [
@@ -87,6 +88,7 @@ Object {
     4 => 2,
   },
   "passiveEffectDuration": 0,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 15,
   "updaters": Array [
@@ -123,6 +125,7 @@ Object {
     3 => 0,
   },
   "passiveEffectDuration": 0,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 18,
   "updaters": Array [
@@ -186,6 +189,7 @@ Object {
     6 => 1,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 12,
   "updaters": Array [
@@ -254,6 +258,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 25,
   "updaters": Array [
@@ -303,6 +308,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": 0,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 35,
   "updaters": Array [
@@ -342,6 +348,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": 0,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 45,
   "updaters": Array [
@@ -451,6 +458,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 12,
           "updaters": Array [
@@ -558,6 +566,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 25,
           "updaters": Array [
@@ -628,6 +637,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": 0,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 35,
           "updaters": Array [
@@ -679,6 +689,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": 0,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 45,
           "updaters": Array [
@@ -952,6 +963,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 11,
           "updaters": Array [
@@ -1040,6 +1052,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 22,
           "updaters": Array [
@@ -1147,6 +1160,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 35,
           "updaters": Array [
@@ -1359,6 +1373,7 @@ Object {
         1 => 0,
       },
       "passiveEffectDuration": null,
+      "perfInsights": null,
       "priorityLevel": "Immediate",
       "timestamp": 13,
       "updaters": Array [
@@ -1405,6 +1420,7 @@ Object {
         1 => 0,
       },
       "passiveEffectDuration": 0,
+      "perfInsights": null,
       "priorityLevel": "Immediate",
       "timestamp": 34,
       "updaters": Array [
@@ -1441,6 +1457,7 @@ Object {
         1 => 0,
       },
       "passiveEffectDuration": 0,
+      "perfInsights": null,
       "priorityLevel": "Immediate",
       "timestamp": 44,
       "updaters": Array [
@@ -1624,6 +1641,7 @@ Object {
         17 => 1,
       },
       "passiveEffectDuration": null,
+      "perfInsights": null,
       "priorityLevel": "Immediate",
       "timestamp": 24,
       "updaters": Array [
@@ -1806,6 +1824,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 13,
           "updaters": Array [
@@ -1876,6 +1895,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": 0,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 34,
           "updaters": Array [
@@ -1927,6 +1947,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": 0,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 44,
           "updaters": Array [
@@ -2170,6 +2191,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 24,
           "updaters": Array [
@@ -2271,6 +2293,7 @@ Object {
         2 => 0,
       },
       "passiveEffectDuration": null,
+      "perfInsights": null,
       "priorityLevel": "Immediate",
       "timestamp": 0,
       "updaters": Array [
@@ -2350,6 +2373,7 @@ Object {
     4 => 0,
   },
   "passiveEffectDuration": 0,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -2393,6 +2417,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -2430,6 +2455,7 @@ Object {
     4 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -2467,6 +2493,7 @@ Object {
     4 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -2508,6 +2535,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -2549,6 +2577,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -2620,6 +2649,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": 0,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -2687,6 +2717,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -2730,6 +2761,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -2773,6 +2805,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -2838,6 +2871,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -2903,6 +2937,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -3082,6 +3117,7 @@ Object {
     7 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -3171,6 +3207,7 @@ Object {
     2 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -3252,6 +3289,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -3334,6 +3372,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -3415,6 +3454,7 @@ Object {
     1 => 0,
   },
   "passiveEffectDuration": null,
+  "perfInsights": null,
   "priorityLevel": "Immediate",
   "timestamp": 0,
   "updaters": Array [
@@ -3550,6 +3590,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -3687,6 +3728,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -3822,6 +3864,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -3958,6 +4001,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [
@@ -4093,6 +4137,7 @@ Object {
             ],
           ],
           "passiveEffectDuration": null,
+          "perfInsights": null,
           "priorityLevel": "Immediate",
           "timestamp": 0,
           "updaters": Array [

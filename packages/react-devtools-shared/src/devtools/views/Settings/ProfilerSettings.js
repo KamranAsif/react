@@ -8,9 +8,9 @@
  */
 
 import * as React from 'react';
-import {useCallback, useContext, useMemo, useRef} from 'react';
-import {useSubscription} from '../hooks';
+import {useCallback, useContext, useRef, useSyncExternalStore} from 'react';
 import {StoreContext} from '../context';
+import {enableProfilerPerfInsights} from 'react-devtools-feature-flags';
 import {ProfilerContext} from 'react-devtools-shared/src/devtools/views/Profiler/ProfilerContext';
 
 import styles from './SettingsShared.css';
@@ -24,26 +24,44 @@ export default function ProfilerSettings(_: {||}) {
   } = useContext(ProfilerContext);
   const store = useContext(StoreContext);
 
-  const recordChangeDescriptionsSubscription = useMemo(
-    () => ({
-      getCurrentValue: () => store.recordChangeDescriptions,
-      subscribe: (callback: Function) => {
-        store.addListener('recordChangeDescriptions', callback);
-        return () => store.removeListener('recordChangeDescriptions', callback);
-      },
-    }),
-    [store],
-  );
-  const recordChangeDescriptions = useSubscription<boolean>(
-    recordChangeDescriptionsSubscription,
-  );
-
   const updateRecordChangeDescriptions = useCallback(
     ({currentTarget}) => {
       store.recordChangeDescriptions = currentTarget.checked;
     },
     [store],
   );
+
+  const recordChangeDescriptions = useSyncExternalStore(
+    function subscribe(callback) {
+      store.addListener('recordChangeDescriptions', callback);
+      return function unsubscribe() {
+        store.removeListener('recordChangeDescriptions', callback);
+      };
+    },
+    function getState() {
+      return store.recordChangeDescriptions;
+    },
+  );
+
+  const recordPerfInsights = useSyncExternalStore(
+    function subscribe(callback) {
+      store.addListener('recordPerfInsights', callback);
+      return function unsubscribe() {
+        store.removeListener('recordPerfInsights', callback);
+      };
+    },
+    function getState() {
+      return store.recordPerfInsights;
+    },
+  );
+
+  const updateRecordPerfInsights = useCallback(
+    ({currentTarget}) => {
+      store.recordPerfInsights = currentTarget.checked;
+    },
+    [store],
+  );
+
   const updateMinCommitDuration = useCallback(
     (event: SyntheticEvent<HTMLInputElement>) => {
       const newValue = parseFloat(event.currentTarget.value);
@@ -80,6 +98,19 @@ export default function ProfilerSettings(_: {||}) {
           Record why each component rendered while profiling.
         </label>
       </div>
+
+      {enableProfilerPerfInsights && (
+        <div className={styles.Setting}>
+          <label>
+            <input
+              type="checkbox"
+              checked={recordPerfInsights}
+              onChange={updateRecordPerfInsights}
+            />{' '}
+            Get performance insights for each component while profiling.
+          </label>
+        </div>
+      )}
 
       <div className={styles.Setting}>
         <label>

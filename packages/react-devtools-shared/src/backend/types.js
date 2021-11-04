@@ -159,9 +159,22 @@ export type ChangeDescription = {|
   hooks?: Array<number> | null,
 |};
 
+export type PerfInsight = {|
+  isFirstMount: boolean,
+  didContextChange: boolean,
+  didContextDeepChange: boolean,
+  didHooksChange: boolean,
+  didPropsChange: boolean,
+  didPropsDeepChange: boolean,
+  didStateChange: boolean,
+  didStateDeepChange: boolean,
+  nonMemoizedProps: Array<string> | null,
+|};
+
 export type CommitDataBackend = {|
   // Tuple of fiber ID and change description
   changeDescriptions: Array<[number, ChangeDescription]> | null,
+  perfInsights: Array<[number, PerfInsight]> | null,
   duration: number,
   // Only available in certain (newer) React builds,
   effectDuration: number | null,
@@ -381,7 +394,10 @@ export type RendererInterface = {
   renderer: ReactRenderer | null,
   setTraceUpdatesEnabled: (enabled: boolean) => void,
   setTrackedPath: (path: Array<PathFrame> | null) => void,
-  startProfiling: (recordChangeDescriptions: boolean) => void,
+  startProfiling: (
+    recordChangeDescriptions: boolean,
+    recordPerfInsights: boolean,
+  ) => void,
   stopProfiling: () => void,
   storeAsGlobal: (
     id: number,

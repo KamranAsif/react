@@ -10,6 +10,7 @@
 import * as React from 'react';
 import {Fragment, useContext, useEffect, useRef} from 'react';
 import WhatChanged from './WhatChanged';
+import PerfInsight from './PerfInsight';
 import {ProfilerContext} from './ProfilerContext';
 import {formatDuration, formatTime} from './utils';
 import {StoreContext} from '../context';
@@ -114,6 +115,7 @@ export default function SidebarSelectedFiberInfo(_: Props) {
       </div>
       <div className={styles.Content} onKeyDown={handleKeyDown} tabIndex={0}>
         <WhatChanged fiberID={((selectedFiberID: any): number)} />
+        <PerfInsight fiberID={((selectedFiberID: any): number)} />
         {listItems.length > 0 && (
           <Fragment>
             <label className={styles.Label}>Rendered at</label>: {listItems}

@@ -17,6 +17,7 @@ export const consoleManagedByDevToolsDuringStrictMode = false;
 export const enableLogger = true;
 export const enableNamedHooksFeature = true;
 export const enableProfilerChangedHookIndices = true;
+export const enableProfilerPerfInsights = false;
 export const enableStyleXFeatures = true;
 export const isInternalFacebookBuild = true;
 
