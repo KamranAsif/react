@@ -9,6 +9,7 @@
 
 import type {ElementType} from 'react-devtools-shared/src/types';
 import type {SerializedElement} from '../Components/types';
+import type {ChangeDescription, PerfInsight} from '../../../backend/types';
 
 export type CommitTreeNode = {|
   id: number,
@@ -35,18 +36,12 @@ export type SnapshotNode = {|
   type: ElementType,
 |};
 
-export type ChangeDescription = {|
-  context: Array<string> | boolean | null,
-  didHooksChange: boolean,
-  isFirstMount: boolean,
-  props: Array<string> | null,
-  state: Array<string> | null,
-  hooks?: Array<number> | null,
-|};
-
 export type CommitDataFrontend = {|
   // Map of Fiber (ID) to a description of what changed in this commit.
   changeDescriptions: Map<number, ChangeDescription> | null,
+
+  // Map of Fiber (ID) to a performance insights for this fiber.
+  perfInsights: Map<number, PerfInsight> | null,
 
   // How long was the render phase?
   duration: number,
@@ -110,6 +105,7 @@ export type ProfilingDataFrontend = {|
 
 export type CommitDataExport = {|
   changeDescriptions: Array<[number, ChangeDescription]> | null,
+  perfInsights: Array<[number, PerfInsight]> | null,
   duration: number,
   effectDuration: number | null,
   // Tuple of fiber ID and actual duration

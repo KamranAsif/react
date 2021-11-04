@@ -7,6 +7,8 @@
  * @flow
  */
 
+import isEqual from 'lodash.isequal';
+import {isValidElement} from 'react';
 import {gt, gte} from 'semver';
 import {
   ComponentFilterDisplayName,
@@ -48,6 +50,7 @@ import {
   __DEBUG__,
   SESSION_STORAGE_RELOAD_AND_PROFILE_KEY,
   SESSION_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY,
+  SESSION_STORAGE_RECORD_PERF_INSIGHTS_KEY,
   TREE_OPERATION_ADD,
   TREE_OPERATION_REMOVE,
   TREE_OPERATION_REMOVE_ROOT,
@@ -82,7 +85,10 @@ import {
   MEMO_SYMBOL_STRING,
 } from './ReactSymbols';
 import {format} from './utils';
-import {enableProfilerChangedHookIndices} from 'react-devtools-feature-flags';
+import {
+  enableProfilerChangedHookIndices,
+  enableProfilerPerfInsights,
+} from 'react-devtools-feature-flags';
 import is from 'shared/objectIs';
 import isArray from 'shared/isArray';
 import hasOwnProperty from 'shared/hasOwnProperty';
@@ -90,6 +96,7 @@ import hasOwnProperty from 'shared/hasOwnProperty';
 import type {Fiber} from 'react-reconciler/src/ReactInternalTypes';
 import type {
   ChangeDescription,
+  PerfInsight,
   CommitDataBackend,
   DevToolsHook,
   InspectedElement,
@@ -1251,6 +1258,88 @@ export function attach(
     }
   }
 
+  function getPerfInsight(
+    prevFiber: Fiber | null,
+    nextFiber: Fiber,
+  ): PerfInsight | null {
+    switch (getElementTypeForFiber(nextFiber)) {
+      case ElementTypeClass:
+      case ElementTypeFunction:
+      case ElementTypeMemo:
+      case ElementTypeForwardRef:
+        if (prevFiber === null) {
+          return {
+            isFirstMount: true,
+            didContextChange: false,
+            didContextDeepChange: false,
+            didHooksChange: false,
+            didPropsChange: false,
+            didPropsDeepChange: false,
+            didStateChange: false,
+            didStateDeepChange: false,
+            nonMemoizedProps: null,
+          };
+        } else {
+          const changedPropKeys = getChangedKeys(
+            prevFiber.memoizedProps,
+            nextFiber.memoizedProps,
+          );
+          const changedStateKeys = getChangedKeys(
+            prevFiber.memoizedState,
+            nextFiber.memoizedState,
+          );
+
+          const changedContextKeys = getContextChangedKeys(nextFiber);
+
+          const didContextChange = isArray(changedContextKeys)
+            ? changedContextKeys.length > 0
+            : changedContextKeys === true;
+
+          const deepChangedPropKeys = getDeepChangedKeys(
+            prevFiber.memoizedProps,
+            nextFiber.memoizedProps,
+          );
+
+          const deepChangedStateKeys = getDeepChangedKeys(
+            prevFiber.memoizedState,
+            nextFiber.memoizedState,
+          );
+
+          const indices = getChangedHooksIndices(
+            prevFiber.memoizedState,
+            nextFiber.memoizedState,
+          );
+
+          const nonMemoizedProps = getNonMemoizedProps(
+            nextFiber,
+            deepChangedPropKeys,
+          );
+
+          const data: PerfInsight = {
+            isFirstMount: false,
+            // TODO: Verify this is working as expected.
+            didContextChange,
+            //TODO implement
+            didContextDeepChange: false,
+            didHooksChange: indices !== null && indices.length > 0,
+            didPropsChange:
+              changedPropKeys != null && changedPropKeys.length > 0,
+            didPropsDeepChange:
+              deepChangedPropKeys != null && deepChangedPropKeys.length > 0,
+            didStateChange:
+              changedStateKeys != null && changedStateKeys.length > 0,
+            didStateDeepChange:
+              deepChangedStateKeys != null && deepChangedStateKeys.length > 0,
+            nonMemoizedProps,
+          };
+
+          return data;
+        }
+      default:
+        return null;
+    }
+  }
+
   function updateContextsForFiber(fiber: Fiber) {
     switch (getElementTypeForFiber(fiber)) {
       case ElementTypeClass:
@@ -1408,6 +1497,17 @@ export function attach(
     );
   }
 
+  function isCallbackOrMemo(memoizedState) {
+    if (memoizedState === null || typeof memoizedState !== 'object') {
+      return false;
+    }
+    return (
+      isArray(memoizedState) &&
+      memoizedState.length === 2 &&
+      (memoizedState[1] === null || isArray(memoizedState[1]))
+    );
+  }
+
   function didHookChange(prev: any, next: any): boolean {
     const prevMemoizedState = prev.memoizedState;
     const nextMemoizedState = next.memoizedState;
@@ -1476,18 +1576,22 @@ export function attach(
     return null;
   }
 
+  function isHooksChange(next: any): boolean {
+    return (
+      next.hasOwnProperty('baseState') &&
+      next.hasOwnProperty('memoizedState') &&
+      next.hasOwnProperty('next') &&
+      next.hasOwnProperty('queue')
+    );
+  }
+
   function getChangedKeys(prev: any, next: any): null | Array<string> {
     if (prev == null || next == null) {
       return null;
     }
 
     // We can't report anything meaningful for hooks changes.
-    if (
-      next.hasOwnProperty('baseState') &&
-      next.hasOwnProperty('memoizedState') &&
-      next.hasOwnProperty('next') &&
-      next.hasOwnProperty('queue')
-    ) {
+    if (isHooksChange(next)) {
       return null;
     }
 
@@ -1501,6 +1605,117 @@ export function attach(
     }
 
     return changedKeys;
+  }
+
+  function getDeepChangedKeys(prev: any, next: any): null | Array<string> {
+    if (prev == null || next == null) {
+      return null;
+    }
+
+    // We can't report anything meaningful for hooks changes.
+    if (isHooksChange(next)) {
+      return null;
+    }
+
+    const keys = new Set([...Object.keys(prev), ...Object.keys(next)]);
+    return Array.from(keys).filter(key => !isEqual(prev[key], next[key]));
+  }
+
+  function isFunctionOrComponent(value: any) {
+    return typeof value === 'function' || isValidElement(value);
+  }
+
+  /**
+   * Scan through a fiber's parent to find function & component props that
+   * weren't passed through props or created from a callback/memo.
+   */
+  function getNonMemoizedProps(
+    fiber: Fiber,
+    changedPropKeys: Array<string> | null,
+  ): Array<string> | null {
+    const debugOwner = fiber._debugOwner;
+    if (
+      changedPropKeys == null ||
+      debugOwner == null ||
+      // Ignore memo parents since they just pass the props through.
+      getTypeSymbol(debugOwner.type) === MEMO_SYMBOL_STRING
+    ) {
+      return null;
+    }
+
+    // Filter props that are passed through from the parent
+    const createdProps = changedPropKeys
+      // Ignore the children prop.
+      .filter(prop => prop !== 'children')
+      .filter(
+        prop => debugOwner.memoizedProps[prop] !== fiber.memoizedProps[prop],
+      )
+      // For now, only filter functions and elements.
+      .filter(prop => isFunctionOrComponent(fiber.memoizedProps[prop]));
+
+    if (createdProps.length === 0) return null;
+
+    const elementType = getElementTypeForFiber(debugOwner);
+
+    let memoValues = [];
+    if (elementType === FunctionComponent) {
+      memoValues = getMemoValues(debugOwner);
+    } else if (elementType === ClassComponent) {
+      memoValues = getStaticClassValues(debugOwner);
+    }
+
+    const memoValueSet = new Set([memoValues]);
+
+    // We can check our hook values to find functions not
+    // created from useCallback/useMemo or static properties.
+    return createdProps.filter(
+      prop => !memoValueSet.has(fiber.memoizedProps[prop]),
+    );
+  }
+
+  const REACT_LIFECYCLE_FUNCTIONS = new Set([
+    'constructor',
+    'shouldComponentUpdate',
+    'render',
+    'getSnapshotBeforeUpdate',
+    'componentDidMount',
+    'UNSAFE_componentWillUpdate',
+    'UNSAFE_componentWillReceiveProps',
+    'componentWillUnmount',
+    'componentDidCatch',
+  ]);
+
+  // Returns functions and components that exist on the class instance.
+  function getStaticClassValues(fiber: Fiber) {
+    const propertyNames = Object.getOwnPropertyNames(
+      fiber.stateNode.constructor.prototype,
+    );
+
+    const staticFunctions = propertyNames.filter(
+      propertyName => !REACT_LIFECYCLE_FUNCTIONS.has(propertyName),
+    );
+
+    return [
+      ...staticFunctions,
+      ...Object.values(fiber.stateNode).filter(isFunctionOrComponent),
+    ];
+  }
+
+  function getMemoValues(fiber: Fiber) {
+    const memoValues = [];
+
+    let next = fiber.memoizedState;
+    while (next !== null) {
+      if (
+        isCallbackOrMemo(next.memoizedState) &&
+        isFunctionOrComponent(next.memoizedState[0])
+      ) {
+        memoValues.push(next.memoizedState[0]);
+      }
+      next = next.next;
+    }
+
+    return memoValues;
   }
 
   // eslint-disable-next-line no-unused-vars
@@ -2173,7 +2388,21 @@ export function attach(
                 metadata.changeDescriptions.set(id, changeDescription);
               }
             }
+          }
 
+          if (recordPerfInsights && enableProfilerPerfInsights) {
+            const perfInsight = getPerfInsight(alternate, fiber);
+            if (perfInsight !== null) {
+              if (metadata.perfInsights !== null) {
+                metadata.perfInsights.set(id, perfInsight);
+              }
+            }
+          }
+
+          if (
+            recordChangeDescriptions ||
+            (recordPerfInsights && enableProfilerPerfInsights)
+          ) {
             updateContextsForFiber(fiber);
           }
         }
@@ -2520,6 +2749,7 @@ export function attach(
           // The frontend may request this information after profiling has stopped.
           currentCommitProfilingMetadata = {
             changeDescriptions: recordChangeDescriptions ? new Map() : null,
+            perfInsights: recordPerfInsights ? new Map() : null,
             durations: [],
             commitTime: getCurrentTime() - profilingStartTime,
             maxActualDuration: 0,
@@ -2590,6 +2820,7 @@ export function attach(
       // The frontend may request this information after profiling has stopped.
       currentCommitProfilingMetadata = {
         changeDescriptions: recordChangeDescriptions ? new Map() : null,
+        perfInsights: recordPerfInsights ? new Map() : null,
         durations: [],
         commitTime: getCurrentTime() - profilingStartTime,
         maxActualDuration: 0,
@@ -3792,6 +4023,7 @@ export function attach(
 
   type CommitProfilingData = {|
     changeDescriptions: Map<number, ChangeDescription> | null,
+    perfInsights: Map<number, PerfInsight> | null,
     commitTime: number,
     durations: Array<number>,
     effectDuration: number | null,
@@ -3812,6 +4044,7 @@ export function attach(
   let isProfiling: boolean = false;
   let profilingStartTime: number = 0;
   let recordChangeDescriptions: boolean = false;
+  let recordPerfInsights: boolean = false;
   let rootToCommitProfilingMetadataMap: CommitProfilingMetadataMap | null = null;
 
   function getProfilingData(): ProfilingDataBackend {
@@ -3848,6 +4081,7 @@ export function attach(
         commitProfilingMetadata.forEach((commitProfilingData, commitIndex) => {
           const {
             changeDescriptions,
+            perfInsights,
             durations,
             effectDuration,
             maxActualDuration,
@@ -3870,6 +4104,8 @@ export function attach(
               changeDescriptions !== null
                 ? Array.from(changeDescriptions.entries())
                 : null,
+            perfInsights:
+              perfInsights !== null ? Array.from(perfInsights.entries()) : null,
             duration: maxActualDuration,
             effectDuration,
             fiberActualDurations,
@@ -3896,12 +4132,16 @@ export function attach(
     };
   }
 
-  function startProfiling(shouldRecordChangeDescriptions: boolean) {
+  function startProfiling(
+    shouldRecordChangeDescriptions: boolean,
+    shouldRecordPerfInsights: boolean,
+  ) {
     if (isProfiling) {
       return;
     }
 
     recordChangeDescriptions = shouldRecordChangeDescriptions;
+    recordPerfInsights = shouldRecordPerfInsights;
 
     // Capture initial values as of the time profiling starts.
     // It's important we snapshot both the durations and the id-to-root map,
@@ -3935,6 +4175,7 @@ export function attach(
   function stopProfiling() {
     isProfiling = false;
     recordChangeDescriptions = false;
+    recordPerfInsights = false;
   }
 
   // Automatically start profiling so that we don't miss timing info from initial "mount".
@@ -3943,6 +4184,8 @@ export function attach(
   ) {
     startProfiling(
       sessionStorageGetItem(SESSION_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY) ===
+        'true',
+      sessionStorageGetItem(SESSION_STORAGE_RECORD_PERF_INSIGHTS_KEY) ===
         'true',
     );
   }

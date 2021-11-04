@@ -12,6 +12,7 @@ import {Fragment, useContext} from 'react';
 import {ProfilerContext} from './ProfilerContext';
 import {formatDuration} from './utils';
 import WhatChanged from './WhatChanged';
+import PerfInsight from './PerfInsight';
 import {StoreContext} from '../context';
 
 import styles from './HoveredFiberInfo.css';
@@ -69,6 +70,7 @@ export default function HoveredFiberInfo({fiberData}: Props) {
       <div className={styles.Content}>
         {renderDurationInfo || <div>Did not render.</div>}
         <WhatChanged fiberID={((id: any): number)} />
+        <PerfInsight fiberID={((id: any): number)} />
       </div>
     </Fragment>
   );

@@ -67,6 +67,10 @@ export function prepareProfilingDataFrontendFromBackendAndStore(
               commitDataBackend.changeDescriptions != null
                 ? new Map(commitDataBackend.changeDescriptions)
                 : null,
+            perfInsights:
+              commitDataBackend.perfInsights != null
+                ? new Map(commitDataBackend.perfInsights)
+                : null,
             duration: commitDataBackend.duration,
             effectDuration: commitDataBackend.effectDuration,
             fiberActualDurations: new Map(
@@ -137,6 +141,7 @@ export function prepareProfilingDataFrontendFromExport(
         commitData: commitData.map(
           ({
             changeDescriptions,
+            perfInsights,
             duration,
             effectDuration,
             fiberActualDurations,
@@ -148,6 +153,7 @@ export function prepareProfilingDataFrontendFromExport(
           }) => ({
             changeDescriptions:
               changeDescriptions != null ? new Map(changeDescriptions) : null,
+            perfInsights: perfInsights != null ? new Map(perfInsights) : null,
             duration,
             effectDuration,
             fiberActualDurations: new Map(fiberActualDurations),
@@ -188,6 +194,7 @@ export function prepareProfilingDataExport(
         commitData: commitData.map(
           ({
             changeDescriptions,
+            perfInsights,
             duration,
             effectDuration,
             fiberActualDurations,
@@ -201,6 +208,8 @@ export function prepareProfilingDataExport(
               changeDescriptions != null
                 ? Array.from(changeDescriptions.entries())
                 : null,
+            perfInsights:
+              perfInsights != null ? Array.from(perfInsights.entries()) : null,
             duration,
             effectDuration,
             fiberActualDurations: Array.from(fiberActualDurations.entries()),

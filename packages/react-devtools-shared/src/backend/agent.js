@@ -12,6 +12,7 @@ import throttle from 'lodash.throttle';
 import {
   SESSION_STORAGE_LAST_SELECTION_KEY,
   SESSION_STORAGE_RELOAD_AND_PROFILE_KEY,
+  SESSION_STORAGE_RECORD_PERF_INSIGHTS_KEY,
   SESSION_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY,
   __DEBUG__,
 } from '../constants';
@@ -150,6 +151,7 @@ export default class Agent extends EventEmitter<{|
   _bridge: BackendBridge;
   _isProfiling: boolean = false;
   _recordChangeDescriptions: boolean = false;
+  _recordPerfInsights: boolean = false;
   _rendererInterfaces: {[key: RendererID]: RendererInterface, ...} = {};
   _persistedSelection: PersistedSelection | null = null;
   _persistedSelectionMatch: PathMatch | null = null;
@@ -165,9 +167,13 @@ export default class Agent extends EventEmitter<{|
         sessionStorageGetItem(
           SESSION_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY,
         ) === 'true';
+      this._recordPerfInsights =
+        sessionStorageGetItem(SESSION_STORAGE_RECORD_PERF_INSIGHTS_KEY) ===
+        'true';
       this._isProfiling = true;
 
       sessionStorageRemoveItem(SESSION_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY);
+      sessionStorageRemoveItem(SESSION_STORAGE_RECORD_PERF_INSIGHTS_KEY);
       sessionStorageRemoveItem(SESSION_STORAGE_RELOAD_AND_PROFILE_KEY);
     }
 
@@ -518,11 +524,18 @@ export default class Agent extends EventEmitter<{|
     }
   };
 
-  reloadAndProfile = (recordChangeDescriptions: boolean) => {
+  reloadAndProfile = ([recordChangeDescriptions, recordPerfInsights]: [
+    boolean,
+    boolean,
+  ]) => {
     sessionStorageSetItem(SESSION_STORAGE_RELOAD_AND_PROFILE_KEY, 'true');
     sessionStorageSetItem(
       SESSION_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY,
       recordChangeDescriptions ? 'true' : 'false',
+    );
+    sessionStorageSetItem(
+      SESSION_STORAGE_RECORD_PERF_INSIGHTS_KEY,
+      recordPerfInsights ? 'true' : 'false',
     );
 
     // This code path should only be hit if the shell has explicitly told the Store that it supports profiling.
@@ -561,7 +574,10 @@ export default class Agent extends EventEmitter<{|
     this._rendererInterfaces[rendererID] = rendererInterface;
 
     if (this._isProfiling) {
-      rendererInterface.startProfiling(this._recordChangeDescriptions);
+      rendererInterface.startProfiling(
+        this._recordChangeDescriptions,
+        this._recordPerfInsights,
+      );
     }
 
     rendererInterface.setTraceUpdatesEnabled(this._traceUpdatesEnabled);
@@ -601,14 +617,18 @@ export default class Agent extends EventEmitter<{|
     this.emit('shutdown');
   };
 
-  startProfiling = (recordChangeDescriptions: boolean) => {
+  startProfiling = ([recordChangeDescriptions, recordPerfInsights]: [
+    boolean,
+    boolean,
+  ]) => {
     this._recordChangeDescriptions = recordChangeDescriptions;
+    this._recordPerfInsights = recordPerfInsights;
     this._isProfiling = true;
     for (const rendererID in this._rendererInterfaces) {
       const renderer = ((this._rendererInterfaces[
         (rendererID: any)
       ]: any): RendererInterface);
-      renderer.startProfiling(recordChangeDescriptions);
+      renderer.startProfiling(recordChangeDescriptions, recordPerfInsights);
     }
     this._bridge.send('profilingStatus', this._isProfiling);
   };
@@ -616,6 +636,7 @@ export default class Agent extends EventEmitter<{|
   stopProfiling = () => {
     this._isProfiling = false;
     this._recordChangeDescriptions = false;
+    this._recordPerfInsights = false;
     for (const rendererID in this._rendererInterfaces) {
       const renderer = ((this._rendererInterfaces[
         (rendererID: any)

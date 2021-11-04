@@ -41,6 +41,9 @@ export const LOCAL_STORAGE_PARSE_HOOK_NAMES_KEY =
 export const SESSION_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY =
   'React::DevTools::recordChangeDescriptions';
 
+export const SESSION_STORAGE_RECORD_PERF_INSIGHTS_KEY =
+  'React::DevTools::recordPerfInsights';
+
 export const SESSION_STORAGE_RELOAD_AND_PROFILE_KEY =
   'React::DevTools::reloadAndProfile';
 

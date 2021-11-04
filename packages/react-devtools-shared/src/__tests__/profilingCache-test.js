@@ -11,6 +11,8 @@ import typeof ReactTestRenderer from 'react-test-renderer';
 import type {FrontendBridge} from 'react-devtools-shared/src/bridge';
 import type Store from 'react-devtools-shared/src/devtools/store';
 
+import isEqual from 'lodash.isequal';
+
 describe('ProfilingCache', () => {
   let PropTypes;
   let React;
@@ -32,6 +34,9 @@ describe('ProfilingCache', () => {
     store = global.store;
     store.collapseNodesByDefault = false;
     store.recordChangeDescriptions = true;
+    store.recordPerfInsights = false;
+
+    require('react-devtools-feature-flags').enableProfilerPerfInsights = true;
 
     PropTypes = require('prop-types');
     React = require('react');
@@ -751,5 +756,672 @@ describe('ProfilingCache', () => {
     utils.act(() => Simulate.click(linkRef.current));
     utils.act(() => store.profilerStore.stopProfiling());
     expect(container.textContent).toBe('About');
+  });
+
+  it('should properly detect when a component is missing a shallow/deep memo for props', () => {
+    // Disable change descriptions for a smaller snapshot
+    store.recordChangeDescriptions = false;
+    store.recordPerfInsights = true;
+
+    const ComponentNeedsMemo = ({count}) => {
+      return null;
+    };
+
+    const ComponentShallowMemo = React.memo(({count}) => {
+      return null;
+    });
+
+    const ComponentNeedsDeepMemo = React.memo(({style}) => {
+      return null;
+    });
+
+    const ComponentDeepMemo = React.memo(({style}) => {
+      return null;
+    }, isEqual);
+
+    const container = document.createElement('div');
+
+    // Static value so reference doesn't change.
+    const style = {color: 'red'};
+
+    utils.act(() => store.profilerStore.startProfiling());
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={1} />
+          <ComponentShallowMemo count={1} />
+          <ComponentNeedsDeepMemo style={style} />
+          <ComponentDeepMemo style={style} />
+        </>,
+        container,
+      ),
+    );
+
+    // Second render has no changes.
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={1} />
+          <ComponentShallowMemo count={1} />
+          <ComponentNeedsDeepMemo style={style} />
+          <ComponentDeepMemo style={style} />
+        </>,
+        container,
+      ),
+    );
+
+    // Third render has shallow changes only.
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={2} />
+          <ComponentShallowMemo count={2} />
+          <ComponentNeedsDeepMemo style={style} />
+          <ComponentDeepMemo style={style} />
+        </>,
+        container,
+      ),
+    );
+
+    // Fourth render has deep changes only.
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={2} />
+          <ComponentShallowMemo count={2} />
+          <ComponentNeedsDeepMemo style={{color: 'red'}} />
+          <ComponentDeepMemo style={{color: 'red'}} />
+        </>,
+        container,
+      ),
+    );
+
+    utils.act(() => store.profilerStore.stopProfiling());
+
+    function getPerfInsightSnapshot(index: number) {
+      const rootID = store.roots[0];
+      const commitData = store.profilerStore.getCommitData(rootID, index);
+      return commitData.perfInsights;
+    }
+
+    // First mount, expect everything to be false.
+    expect(getPerfInsightSnapshot(0)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+        3 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+        4 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+        5 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+        6 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+
+    // Second render. Only non memoized component updates didPropsChange is false.
+    expect(getPerfInsightSnapshot(1)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+
+    // Third render. We increment count and expect props to deep change.
+    expect(getPerfInsightSnapshot(2)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+        3 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+
+    // Fourth render. We update style and expect NeedsDeepMemo to update,
+    // telling us didPropsDeepChange to be false
+    expect(getPerfInsightSnapshot(3)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+        4 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+  });
+
+  it('should properly detect when a component is missing a shallow/deep memo for state', () => {
+    // Disable change descriptions for a smaller snapshot
+    store.recordChangeDescriptions = false;
+    store.recordPerfInsights = true;
+
+    class ComponentNeedsMemo extends React.Component {
+      static getDerivedStateFromProps(props) {
+        return props;
+      }
+      render() {
+        return null;
+      }
+    }
+
+    class ComponentShallowMemo extends React.PureComponent {
+      static getDerivedStateFromProps(props) {
+        return props;
+      }
+      render() {
+        return null;
+      }
+    }
+
+    class ComponentNeedsDeepMemo extends React.PureComponent {
+      static getDerivedStateFromProps(props) {
+        return props;
+      }
+      render() {
+        return null;
+      }
+    }
+    class ComponentDeepMemo extends React.Component {
+      static getDerivedStateFromProps(props) {
+        return props;
+      }
+      shouldComponentUpdate(newProps, newState) {
+        return !isEqual(this.props, newProps) || !isEqual(this.state, newState);
+      }
+      render() {
+        return null;
+      }
+    }
+
+    const container = document.createElement('div');
+
+    // Static value so reference doesn't change.
+    const style = {color: 'red'};
+
+    utils.act(() => store.profilerStore.startProfiling());
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={1} />
+          <ComponentShallowMemo count={1} />
+          <ComponentNeedsDeepMemo style={style} />
+          <ComponentDeepMemo style={style} />
+        </>,
+        container,
+      ),
+    );
+
+    // Second render has no changes.
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={1} />
+          <ComponentShallowMemo count={1} />
+          <ComponentNeedsDeepMemo style={style} />
+          <ComponentDeepMemo style={style} />
+        </>,
+        container,
+      ),
+    );
+
+    // Third render has shallow changes only.
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={2} />
+          <ComponentShallowMemo count={2} />
+          <ComponentNeedsDeepMemo style={style} />
+          <ComponentDeepMemo style={style} />
+        </>,
+        container,
+      ),
+    );
+
+    // Fourth render has deep changes only.
+    utils.act(() =>
+      legacyRender(
+        <>
+          <ComponentNeedsMemo count={2} />
+          <ComponentShallowMemo count={2} />
+          <ComponentNeedsDeepMemo style={{color: 'red'}} />
+          <ComponentDeepMemo style={{color: 'red'}} />
+        </>,
+        container,
+      ),
+    );
+
+    utils.act(() => store.profilerStore.stopProfiling());
+
+    function getPerfInsightSnapshot(index: number) {
+      const rootID = store.roots[0];
+      const commitData = store.profilerStore.getCommitData(rootID, index);
+      return commitData.perfInsights;
+    }
+
+    // First mount, expect everything to be false.
+    expect(getPerfInsightSnapshot(0)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+        3 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+        4 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+        5 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": true,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+
+    // Second render. Only non memoized component updates didStateChange is false.
+    expect(getPerfInsightSnapshot(1)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+
+    // Third render. We increment count and expect state to deep change.
+    expect(getPerfInsightSnapshot(2)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": true,
+          "didStateDeepChange": true,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+        3 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": true,
+          "didStateDeepChange": true,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+
+    // Fourth render. We update style and except NeedsDeepMemo to update,
+    // telling us didStateDeepChange to be false
+    expect(getPerfInsightSnapshot(3)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+        4 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": false,
+          "didStateChange": true,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+  });
+
+  it('should properly detect when a component is being passed a non memoized function or component', () => {
+    store.recordPerfInsights = true;
+
+    function Dummy(props) {
+      return null;
+    }
+
+    const Child = React.memo(function InnerChild(props) {
+      return null;
+    }, isEqual);
+
+    // Static values whose references don't change.
+    const staticCallback = () => {};
+    const staticComponent = <Dummy />;
+
+    // Change nonDepProp won't trigger our memo/callback.
+    const Parent = React.memo(function InnerParent({depProp, nonDepProp}) {
+      const memoizedCallback = React.useCallback(() => null, depProp);
+      const nonMemoizedCallback = () => null;
+
+      const memoizedComponent = React.useMemo(() => <Dummy />, depProp);
+      const nonMemoizedComponent = <Dummy callback={() => {}} />;
+
+      return (
+        <Child
+          staticCallback={staticCallback}
+          nonMemoizedCallback={nonMemoizedCallback}
+          memoizedCallback={memoizedCallback}
+          staticComponent={staticComponent}
+          nonMemoizedComponent={nonMemoizedComponent}
+          memoizedComponent={memoizedComponent}
+        />
+      );
+    });
+
+    const container = document.createElement('div');
+
+    utils.act(() => store.profilerStore.startProfiling());
+    utils.act(() =>
+      legacyRender(
+        <>
+          <Parent depProp={1} nonDepProp={1} />
+        </>,
+        container,
+      ),
+    );
+
+    // Second render has no changes.
+    utils.act(() =>
+      legacyRender(
+        <>
+          <Parent depProp={1} nonDepProp={1} />
+        </>,
+        container,
+      ),
+    );
+
+    // Third render should only emit nonMemoized values
+    utils.act(() =>
+      legacyRender(
+        <>
+          <Parent depProp={1} nonDepProp={2} />
+        </>,
+        container,
+      ),
+    );
+
+    // Fourth render should also change memoized values
+    utils.act(() =>
+      legacyRender(
+        <>
+          <Parent depProp={2} nonDepProp={2} />
+        </>,
+        container,
+      ),
+    );
+
+    utils.act(() => store.profilerStore.stopProfiling());
+
+    function getPerfInsightSnapshot(index: number) {
+      const rootID = store.roots[0];
+      const commitData = store.profilerStore.getCommitData(rootID, index);
+      return commitData.perfInsights;
+    }
+
+    // First mount, expect everything to be false.
+    expect(getPerfInsightSnapshot(0)).toMatchInlineSnapshot(`
+       Map {
+         2 => Object {
+           "didContextChange": false,
+           "didContextDeepChange": false,
+           "didHooksChange": false,
+           "didPropsChange": false,
+           "didPropsDeepChange": false,
+           "didStateChange": false,
+           "didStateDeepChange": false,
+           "isFirstMount": true,
+           "nonMemoizedProps": null,
+         },
+         3 => Object {
+           "didContextChange": false,
+           "didContextDeepChange": false,
+           "didHooksChange": false,
+           "didPropsChange": false,
+           "didPropsDeepChange": false,
+           "didStateChange": false,
+           "didStateDeepChange": false,
+           "isFirstMount": true,
+           "nonMemoizedProps": null,
+         },
+         4 => Object {
+           "didContextChange": false,
+           "didContextDeepChange": false,
+           "didHooksChange": false,
+           "didPropsChange": false,
+           "didPropsDeepChange": false,
+           "didStateChange": false,
+           "didStateDeepChange": false,
+           "isFirstMount": true,
+           "nonMemoizedProps": null,
+         },
+       }
+		`);
+
+    // Second render, component didn't update so now changes.
+    expect(getPerfInsightSnapshot(1)).toMatchInlineSnapshot(`Map {}`);
+
+    // Third render. Props changed and track nonMemozied values.
+    expect(getPerfInsightSnapshot(2)).toMatchInlineSnapshot(`
+      Map {
+        4 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+        3 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": Array [
+            "nonMemoizedCallback",
+            "nonMemoizedComponent",
+          ],
+        },
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
+
+    // Fourth render. We update memoized values but it shouldn't be included in nonMemoizedProps.
+    expect(getPerfInsightSnapshot(3)).toMatchInlineSnapshot(`
+      Map {
+        4 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+        3 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": Array [
+            "nonMemoizedCallback",
+            "nonMemoizedComponent",
+          ],
+        },
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didPropsChange": true,
+          "didPropsDeepChange": true,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "isFirstMount": false,
+          "nonMemoizedProps": null,
+        },
+      }
+    `);
   });
 });

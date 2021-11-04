@@ -56,6 +56,8 @@ const LOCAL_STORAGE_COLLAPSE_ROOTS_BY_DEFAULT_KEY =
   'React::DevTools::collapseNodesByDefault';
 const LOCAL_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY =
   'React::DevTools::recordChangeDescriptions';
+const LOCAL_STORAGE_RECORD_PERF_INSIGHTS_KEY =
+  'React::DevTools::recordPerfInsights';
 
 type ErrorAndWarningTuples = Array<{|id: number, index: number|}>;
 
@@ -84,6 +86,7 @@ export default class Store extends EventEmitter<{|
   error: [Error],
   mutated: [[Array<number>, Map<number, number>]],
   recordChangeDescriptions: [],
+  recordPerfInsights: [],
   roots: [],
   supportsNativeStyleEditor: [],
   supportsProfiling: [],
@@ -144,6 +147,8 @@ export default class Store extends EventEmitter<{|
 
   _recordChangeDescriptions: boolean = false;
 
+  _recordPerfInsights: boolean = false;
+
   // Incremented each time the store is mutated.
   // This enables a passive effect to detect a mutation between render and commit phase.
   _revision: number = 0;
@@ -186,6 +191,9 @@ export default class Store extends EventEmitter<{|
     this._recordChangeDescriptions =
       localStorageGetItem(LOCAL_STORAGE_RECORD_CHANGE_DESCRIPTIONS_KEY) ===
       'true';
+
+    this._recordPerfInsights =
+      localStorageGetItem(LOCAL_STORAGE_RECORD_PERF_INSIGHTS_KEY) === 'true';
 
     this._componentFilters = getSavedComponentFilters();
 
@@ -385,6 +393,20 @@ export default class Store extends EventEmitter<{|
     );
 
     this.emit('recordChangeDescriptions');
+  }
+
+  get recordPerfInsights(): boolean {
+    return this._recordPerfInsights;
+  }
+  set recordPerfInsights(value: boolean): void {
+    this._recordPerfInsights = value;
+
+    localStorageSetItem(
+      LOCAL_STORAGE_RECORD_PERF_INSIGHTS_KEY,
+      value ? 'true' : 'false',
+    );
+
+    this.emit('recordPerfInsights');
   }
 
   get revision(): number {

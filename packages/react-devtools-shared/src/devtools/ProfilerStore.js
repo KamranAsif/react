@@ -184,7 +184,10 @@ export default class ProfilerStore extends EventEmitter<{|
   }
 
   startProfiling(): void {
-    this._bridge.send('startProfiling', this._store.recordChangeDescriptions);
+    this._bridge.send('startProfiling', [
+      this._store.recordChangeDescriptions,
+      this._store.recordPerfInsights,
+    ]);
 
     // Don't actually update the local profiling boolean yet!
     // Wait for onProfilingStatus() to confirm the status has changed.
