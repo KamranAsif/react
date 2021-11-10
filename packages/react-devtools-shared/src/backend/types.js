@@ -163,11 +163,13 @@ export type PerfInsight = {|
   didContextChange: boolean,
   didContextDeepChange: boolean,
   didHooksChange: boolean,
+  didHooksDeeplyChange: boolean,
+  hooksNeedingMemoization: Array<number> | null,
   didPropsChange: boolean,
   didPropsDeepChange: boolean,
+  propsNeedingMemoization: Array<string> | null,
   didStateChange: boolean,
   didStateDeepChange: boolean,
-  nonMemoizedProps: Array<string> | null,
 |};
 
 export type CommitDataBackend = {|

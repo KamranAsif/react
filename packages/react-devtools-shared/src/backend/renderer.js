@@ -1273,11 +1273,13 @@ export function attach(
             didContextChange: false,
             didContextDeepChange: false,
             didHooksChange: false,
+            didHooksDeeplyChange: false,
+            hooksNeedingMemoization: null,
             didPropsChange: false,
             didPropsDeepChange: false,
+            propsNeedingMemoization: null,
             didStateChange: false,
             didStateDeepChange: false,
-            nonMemoizedProps: null,
           };
         } else {
           const changedPropKeys = getChangedKeys(
@@ -1305,12 +1307,25 @@ export function attach(
             nextFiber.memoizedState,
           );
 
-          const indices = getChangedHooksIndices(
+          const changedHooksIndices = getChangedHooksIndices(
             prevFiber.memoizedState,
             nextFiber.memoizedState,
           );
 
-          const nonMemoizedProps = getNonMemoizedProps(
+          const deepChangedHooksIndices = getDeepChangedHooksIndices(
+            prevFiber.memoizedState,
+            nextFiber.memoizedState,
+          );
+
+          const deepChangedHooksIndicesSet = new Set(deepChangedHooksIndices);
+          const hooksNeedingMemoization =
+            changedHooksIndices != null
+              ? changedHooksIndices.filter(
+                  hookIndex => !deepChangedHooksIndicesSet.has(hookIndex),
+                )
+              : null;
+
+          const propsNeedingMemoization = getNonMemoizedProps(
             nextFiber,
             deepChangedPropKeys,
           );
@@ -1321,16 +1336,21 @@ export function attach(
             didContextChange,
             //TODO implement
             didContextDeepChange: false,
-            didHooksChange: indices !== null && indices.length > 0,
+            didHooksChange:
+              changedHooksIndices !== null && changedHooksIndices.length > 0,
+            didHooksDeeplyChange:
+              deepChangedHooksIndices !== null &&
+              deepChangedHooksIndices.length > 0,
+            hooksNeedingMemoization,
             didPropsChange:
               changedPropKeys != null && changedPropKeys.length > 0,
             didPropsDeepChange:
               deepChangedPropKeys != null && deepChangedPropKeys.length > 0,
+            propsNeedingMemoization,
             didStateChange:
               changedStateKeys != null && changedStateKeys.length > 0,
             didStateDeepChange:
               deepChangedStateKeys != null && deepChangedStateKeys.length > 0,
-            nonMemoizedProps,
           };
 
           return data;
@@ -1481,6 +1501,23 @@ export function attach(
     return true;
   }
 
+  function areHookInputsDeeplyEqual(
+    nextDeps: Array<mixed>,
+    prevDeps: Array<mixed> | null,
+  ) {
+    if (prevDeps === null) {
+      return false;
+    }
+
+    for (let i = 0; i < prevDeps.length && i < nextDeps.length; i++) {
+      if (isEqual(nextDeps[i], prevDeps[i])) {
+        continue;
+      }
+      return false;
+    }
+    return true;
+  }
+
   function isEffect(memoizedState) {
     if (memoizedState === null || typeof memoizedState !== 'object') {
       return false;
@@ -1521,6 +1558,22 @@ export function attach(
     return nextMemoizedState !== prevMemoizedState;
   }
 
+  function didHookDeeplyChange(prev: any, next: any): boolean {
+    const prevMemoizedState = prev.memoizedState;
+    const nextMemoizedState = next.memoizedState;
+
+    if (isEffect(prevMemoizedState) && isEffect(nextMemoizedState)) {
+      return (
+        prevMemoizedState !== nextMemoizedState &&
+        !areHookInputsDeeplyEqual(
+          nextMemoizedState.deps,
+          prevMemoizedState.deps,
+        )
+      );
+    }
+    return !isEqual(nextMemoizedState, prevMemoizedState);
+  }
+
   function didHooksChange(prev: any, next: any): boolean {
     if (prev == null || next == null) {
       return false;
@@ -1544,6 +1597,15 @@ export function attach(
     }
 
     return false;
+  }
+
+  function isHooksChange(next: any): boolean {
+    return (
+      next.hasOwnProperty('baseState') &&
+      next.hasOwnProperty('memoizedState') &&
+      next.hasOwnProperty('next') &&
+      next.hasOwnProperty('queue')
+    );
   }
 
   function getChangedHooksIndices(prev: any, next: any): null | Array<number> {
@@ -1576,13 +1638,32 @@ export function attach(
     return null;
   }
 
-  function isHooksChange(next: any): boolean {
-    return (
-      next.hasOwnProperty('baseState') &&
-      next.hasOwnProperty('memoizedState') &&
-      next.hasOwnProperty('next') &&
-      next.hasOwnProperty('queue')
-    );
+  function getDeepChangedHooksIndices(
+    prev: any,
+    next: any,
+  ): null | Array<number> {
+    if (!enableProfilerChangedHookIndices) {
+      return null;
+    }
+
+    if (prev == null || next == null) {
+      return null;
+    }
+
+    const indices = [];
+    let index = 0;
+    if (isHooksChange(next)) {
+      while (next !== null) {
+        if (didHookDeeplyChange(prev, next)) {
+          indices.push(index);
+        }
+        next = next.next;
+        prev = prev.next;
+        index++;
+      }
+    }
+
+    return indices;
   }
 
   function getChangedKeys(prev: any, next: any): null | Array<string> {
