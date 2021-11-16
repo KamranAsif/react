@@ -54,11 +54,13 @@ export default function PerfInsight({fiberID}: Props) {
     didContextChange,
     didContextDeepChange,
     didHooksChange,
+    didHooksDeeplyChange,
+    hooksNeedingMemoization,
     didPropsChange,
     didPropsDeepChange,
+    propsNeedingMemoization,
     didStateChange,
     didStateDeepChange,
-    nonMemoizedProps,
   } = perfInsight;
 
   if (isFirstMount) {
@@ -91,6 +93,22 @@ export default function PerfInsight({fiberID}: Props) {
     );
   }
 
+  if (hooksNeedingMemoization != null && hooksNeedingMemoization.length > 0) {
+    const hooksList = hooksNeedingMemoization.map(key => (
+      <span key={key} className={styles.Key}>
+        {key}
+      </span>
+    ));
+    insights.push(
+      <div className={styles.Item}>
+        {didHooksDeeplyChange
+          ? '• Some hooks could avoid updating by using memoization:'
+          : '• This component could avoid updating by using memoization for hooks:'}
+        {hooksList}
+      </div>,
+    );
+  }
+
   if (didPropsChange && !didPropsDeepChange) {
     insights.push(
       <div className={styles.Item}>
@@ -109,11 +127,11 @@ export default function PerfInsight({fiberID}: Props) {
     );
   }
 
-  if (nonMemoizedProps != null && nonMemoizedProps.length > 0) {
+  if (propsNeedingMemoization != null && propsNeedingMemoization.length > 0) {
     insights.push(
       <div className={styles.Item}>
         • Can't deep compare props:
-        {nonMemoizedProps.map(key => (
+        {propsNeedingMemoization.map(key => (
           <span key={key} className={styles.Key}>
             {key}
           </span>

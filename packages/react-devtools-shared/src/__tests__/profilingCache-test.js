@@ -851,56 +851,66 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         3 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         4 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         5 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         6 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -912,12 +922,14 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -929,23 +941,27 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         3 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -958,23 +974,27 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         4 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -1095,45 +1115,53 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         3 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         4 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         5 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": true,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -1145,12 +1173,14 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": Array [],
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -1162,23 +1192,27 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": true,
           "didStateDeepChange": true,
+          "hooksNeedingMemoization": Array [],
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         3 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": true,
           "didStateDeepChange": true,
+          "hooksNeedingMemoization": Array [],
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -1191,23 +1225,27 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": false,
           "didPropsDeepChange": false,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": Array [],
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         4 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": false,
           "didStateChange": true,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": Array [],
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -1300,42 +1338,48 @@ describe('ProfilingCache', () => {
 
     // First mount, expect everything to be false.
     expect(getPerfInsightSnapshot(0)).toMatchInlineSnapshot(`
-       Map {
-         2 => Object {
-           "didContextChange": false,
-           "didContextDeepChange": false,
-           "didHooksChange": false,
-           "didPropsChange": false,
-           "didPropsDeepChange": false,
-           "didStateChange": false,
-           "didStateDeepChange": false,
-           "isFirstMount": true,
-           "nonMemoizedProps": null,
-         },
-         3 => Object {
-           "didContextChange": false,
-           "didContextDeepChange": false,
-           "didHooksChange": false,
-           "didPropsChange": false,
-           "didPropsDeepChange": false,
-           "didStateChange": false,
-           "didStateDeepChange": false,
-           "isFirstMount": true,
-           "nonMemoizedProps": null,
-         },
-         4 => Object {
-           "didContextChange": false,
-           "didContextDeepChange": false,
-           "didHooksChange": false,
-           "didPropsChange": false,
-           "didPropsDeepChange": false,
-           "didStateChange": false,
-           "didStateDeepChange": false,
-           "isFirstMount": true,
-           "nonMemoizedProps": null,
-         },
-       }
-		`);
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didHooksDeeplyChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
+          "isFirstMount": true,
+          "propsNeedingMemoization": null,
+        },
+        3 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didHooksDeeplyChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
+          "isFirstMount": true,
+          "propsNeedingMemoization": null,
+        },
+        4 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didHooksDeeplyChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
+          "isFirstMount": true,
+          "propsNeedingMemoization": null,
+        },
+      }
+    `);
 
     // Second render, component didn't update so now changes.
     expect(getPerfInsightSnapshot(1)).toMatchInlineSnapshot(`Map {}`);
@@ -1347,23 +1391,27 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         3 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": Array [
+          "propsNeedingMemoization": Array [
             "nonMemoizedCallback",
             "nonMemoizedComponent",
           ],
@@ -1372,12 +1420,14 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": Array [],
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
       }
     `);
@@ -1389,23 +1439,27 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
         },
         3 => Object {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
           "isFirstMount": false,
-          "nonMemoizedProps": Array [
+          "propsNeedingMemoization": Array [
             "nonMemoizedCallback",
             "nonMemoizedComponent",
           ],
@@ -1414,12 +1468,123 @@ describe('ProfilingCache', () => {
           "didContextChange": false,
           "didContextDeepChange": false,
           "didHooksChange": false,
+          "didHooksDeeplyChange": false,
           "didPropsChange": true,
           "didPropsDeepChange": true,
           "didStateChange": false,
           "didStateDeepChange": false,
+          "hooksNeedingMemoization": Array [],
           "isFirstMount": false,
-          "nonMemoizedProps": null,
+          "propsNeedingMemoization": null,
+        },
+      }
+    `);
+  });
+
+  it('should properly detect hooks needing memoization', () => {
+    store.recordPerfInsights = true;
+
+    let setState;
+    let dispatch;
+
+    const Component = () => {
+      // These hooks may change and initiate re-renders.
+      setState = React.useState({foo: 'bar'})[1];
+      dispatch = React.useReducer((_, action) => action, {foo: 'bar'})[1];
+
+      // These hooks and their dependencies may not change between renders.
+      // We're using them to ensure that they don't trigger false positives.
+      React.useCallback(() => () => {}, []);
+      React.useMemo(() => ({}), []);
+
+      // These hooks never "change".
+      React.useEffect(() => {}, []);
+      React.useLayoutEffect(() => {}, []);
+
+      return null;
+    };
+
+    const container = document.createElement('div');
+
+    utils.act(() => store.profilerStore.startProfiling());
+    utils.act(() => legacyRender(<Component />, container));
+
+    // Emit changed values.
+    utils.act(() => {
+      setState({foo: 'baz'});
+      dispatch({foo: 'baz'});
+    });
+
+    // Emit same values.
+    utils.act(() => {
+      setState({foo: 'baz'});
+      dispatch({foo: 'baz'});
+    });
+
+    utils.act(() => store.profilerStore.stopProfiling());
+
+    function getPerfInsightSnapshot(index: number) {
+      const rootID = store.roots[0];
+      const commitData = store.profilerStore.getCommitData(rootID, index);
+      return commitData.perfInsights;
+    }
+
+    // First mount, expect everything to be false.
+    expect(getPerfInsightSnapshot(0)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": false,
+          "didHooksDeeplyChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "hooksNeedingMemoization": null,
+          "isFirstMount": true,
+          "propsNeedingMemoization": null,
+        },
+      }
+    `);
+
+    // Second render should not emit any hooksNeedingMemoization since values changed.
+    expect(getPerfInsightSnapshot(1)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": true,
+          "didHooksDeeplyChange": true,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "hooksNeedingMemoization": Array [],
+          "isFirstMount": false,
+          "propsNeedingMemoization": null,
+        },
+      }
+    `);
+
+    // Third render should identify hooksNeedingMemoization because values are deep equal
+    expect(getPerfInsightSnapshot(2)).toMatchInlineSnapshot(`
+      Map {
+        2 => Object {
+          "didContextChange": false,
+          "didContextDeepChange": false,
+          "didHooksChange": true,
+          "didHooksDeeplyChange": false,
+          "didPropsChange": false,
+          "didPropsDeepChange": false,
+          "didStateChange": false,
+          "didStateDeepChange": false,
+          "hooksNeedingMemoization": Array [
+            0,
+            1,
+          ],
+          "isFirstMount": false,
+          "propsNeedingMemoization": null,
         },
       }
     `);
