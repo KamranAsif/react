@@ -1585,18 +1585,22 @@ export function attach(
     return isEqual(nextMemoizedState, prevMemoizedState);
   }
 
+  function isHooksChange(next: any): boolean {
+    return (
+      next.hasOwnProperty('baseState') &&
+      next.hasOwnProperty('memoizedState') &&
+      next.hasOwnProperty('next') &&
+      next.hasOwnProperty('queue')
+    );
+  }
+
   function didHooksChange(prev: any, next: any): boolean {
     if (prev == null || next == null) {
       return false;
     }
 
     // We can't report anything meaningful for hooks changes.
-    if (
-      next.hasOwnProperty('baseState') &&
-      next.hasOwnProperty('memoizedState') &&
-      next.hasOwnProperty('next') &&
-      next.hasOwnProperty('queue')
-    ) {
+    if (isHooksChange(next)) {
       while (next !== null) {
         if (didHookChange(prev, next)) {
           return true;
@@ -1610,15 +1614,6 @@ export function attach(
     return false;
   }
 
-  function isHooksChange(next: any): boolean {
-    return (
-      next.hasOwnProperty('baseState') &&
-      next.hasOwnProperty('memoizedState') &&
-      next.hasOwnProperty('next') &&
-      next.hasOwnProperty('queue')
-    );
-  }
-
   function getChangedHooksIndices(prev: any, next: any): null | Array<number> {
     if (enableProfilerChangedHookIndices) {
       if (prev == null || next == null) {
@@ -1627,12 +1622,7 @@ export function attach(
 
       const indices = [];
       let index = 0;
-      if (
-        next.hasOwnProperty('baseState') &&
-        next.hasOwnProperty('memoizedState') &&
-        next.hasOwnProperty('next') &&
-        next.hasOwnProperty('queue')
-      ) {
+      if (isHooksChange(next)) {
         while (next !== null) {
           if (didHookChange(prev, next)) {
             indices.push(index);
@@ -1665,7 +1655,7 @@ export function attach(
     let index = 0;
     if (isHooksChange(next)) {
       while (next !== null) {
-        if (canHookBeMemoized(prev, next)) {
+        if (didHookChange(prev, next) && canHookBeMemoized(prev, next)) {
           indices.push(index);
         }
         next = next.next;
@@ -1726,12 +1716,8 @@ export function attach(
     changedPropKeys: Array<string> | null,
   ): Array<string> | null {
     const debugOwner = fiber._debugOwner;
-    if (
-      changedPropKeys == null ||
-      debugOwner == null ||
-      // Ignore memo parents since they just pass the props through.
-      getTypeSymbol(debugOwner.type) === MEMO_SYMBOL_STRING
-    ) {
+
+    if (changedPropKeys == null || debugOwner == null) {
       return null;
     }
 
@@ -1747,15 +1733,9 @@ export function attach(
 
     if (createdProps.length === 0) return null;
 
-    const elementType = getElementTypeForFiber(debugOwner);
-
-    let memoValues = [];
-    if (elementType === FunctionComponent) {
-      memoValues = getMemoValues(debugOwner);
-    } else if (elementType === ClassComponent) {
-      memoValues = getStaticClassValues(debugOwner);
-    }
-
+    // Values memoized in our parent component.
+    // These static values won't trigger re-renders, so don't filter them out of our return.
+    const memoValues = getMemoValues(debugOwner);
     const memoValueSet = new Set([memoValues]);
 
     // We can check our hook values to find functions not
@@ -1777,6 +1757,22 @@ export function attach(
     'componentDidCatch',
   ]);
 
+  // Return values that have been memoized (memo, callback, state)
+  // or statically declared (class functions)
+  function getMemoValues(fiber: Fiber) {
+    switch (fiber.tag) {
+      case ClassComponent:
+      case IncompleteClassComponent:
+        return getStaticClassValues(fiber);
+      case FunctionComponent:
+      case ForwardRef:
+      case SimpleMemoComponent:
+        return getUseMemoValues(fiber);
+      default:
+        return [];
+    }
+  }
+
   // Returns functions and components that exist on the class instance.
   function getStaticClassValues(fiber: Fiber) {
     const propertyNames = Object.getOwnPropertyNames(
@@ -1789,11 +1785,13 @@ export function attach(
 
     return [
       ...staticFunctions,
+      // We want values in the class that are memoized. This should include values
+      // in the state.
       ...Object.values(fiber.stateNode).filter(isFunctionOrComponent),
     ];
   }
 
-  function getMemoValues(fiber: Fiber) {
+  function getUseMemoValues(fiber: Fiber) {
     const memoValues = [];
 
     let next = fiber.memoizedState;

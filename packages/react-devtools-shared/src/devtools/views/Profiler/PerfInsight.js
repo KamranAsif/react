@@ -96,7 +96,7 @@ export default function PerfInsight({fiberID}: Props) {
   if (hooksNeedingMemoization != null && hooksNeedingMemoization.length > 0) {
     const hooksList = hooksNeedingMemoization.map(key => (
       <span key={key} className={styles.Key}>
-        {key}
+        {key + 1}
       </span>
     ));
     insights.push(
