@@ -162,15 +162,15 @@ export type ChangeDescription = {|
 export type PerfInsight = {|
   isFirstMount: boolean,
   didContextChange: boolean,
-  didContextDeepChange: boolean,
+  canContextBeMemoized: boolean,
   didHooksChange: boolean,
-  didHooksDeeplyChange: boolean,
+  canAllChangedHooksBeMemoized: boolean,
   hooksNeedingMemoization: Array<number> | null,
   didPropsChange: boolean,
-  didPropsDeepChange: boolean,
+  canPropsBeMemoized: boolean,
   propsNeedingMemoization: Array<string> | null,
   didStateChange: boolean,
-  didStateDeepChange: boolean,
+  canStateBeMemoized: boolean,
 |};
 
 export type CommitDataBackend = {|

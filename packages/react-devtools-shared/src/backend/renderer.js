@@ -1291,21 +1291,22 @@ export function attach(
           return {
             isFirstMount: true,
             didContextChange: false,
-            didContextDeepChange: false,
+            canContextBeMemoized: false,
             didHooksChange: false,
-            didHooksDeeplyChange: false,
+            canAllChangedHooksBeMemoized: false,
             hooksNeedingMemoization: null,
             didPropsChange: false,
-            didPropsDeepChange: false,
+            canPropsBeMemoized: false,
             propsNeedingMemoization: null,
             didStateChange: false,
-            didStateDeepChange: false,
+            canStateBeMemoized: false,
           };
         } else {
           const changedPropKeys = getChangedKeys(
             prevFiber.memoizedProps,
             nextFiber.memoizedProps,
           );
+
           const changedStateKeys = getChangedKeys(
             prevFiber.memoizedState,
             nextFiber.memoizedState,
@@ -1317,12 +1318,12 @@ export function attach(
             ? changedContextKeys.length > 0
             : changedContextKeys === true;
 
-          const deepChangedPropKeys = getDeepChangedKeys(
+          const canPropsBeMemoized = canObjectBeMemoized(
             prevFiber.memoizedProps,
             nextFiber.memoizedProps,
           );
 
-          const deepChangedStateKeys = getDeepChangedKeys(
+          const canStateBeMemoized = canObjectBeMemoized(
             prevFiber.memoizedState,
             nextFiber.memoizedState,
           );
@@ -1332,22 +1333,19 @@ export function attach(
             nextFiber.memoizedState,
           );
 
-          const deepChangedHooksIndices = getDeepChangedHooksIndices(
+          const hooksNeedingMemoization = getHooksNeedingMemoziation(
             prevFiber.memoizedState,
             nextFiber.memoizedState,
           );
 
-          const deepChangedHooksIndicesSet = new Set(deepChangedHooksIndices);
-          const hooksNeedingMemoization =
-            changedHooksIndices != null
-              ? changedHooksIndices.filter(
-                  hookIndex => !deepChangedHooksIndicesSet.has(hookIndex),
-                )
-              : null;
+          const canAllChangedHooksBeMemoized =
+            hooksNeedingMemoization != null
+              ? hooksNeedingMemoization.length === changedHooksIndices
+              : false;
 
           const propsNeedingMemoization = getNonMemoizedProps(
             nextFiber,
-            deepChangedPropKeys,
+            changedPropKeys,
           );
 
           const data: PerfInsight = {
@@ -1355,22 +1353,18 @@ export function attach(
             // TODO: Verify this is working as expected.
             didContextChange,
             //TODO implement
-            didContextDeepChange: false,
+            canContextBeMemoized: false,
             didHooksChange:
               changedHooksIndices !== null && changedHooksIndices.length > 0,
-            didHooksDeeplyChange:
-              deepChangedHooksIndices !== null &&
-              deepChangedHooksIndices.length > 0,
+            canAllChangedHooksBeMemoized,
             hooksNeedingMemoization,
             didPropsChange:
               changedPropKeys != null && changedPropKeys.length > 0,
-            didPropsDeepChange:
-              deepChangedPropKeys != null && deepChangedPropKeys.length > 0,
+            canPropsBeMemoized,
             propsNeedingMemoization,
             didStateChange:
               changedStateKeys != null && changedStateKeys.length > 0,
-            didStateDeepChange:
-              deepChangedStateKeys != null && deepChangedStateKeys.length > 0,
+            canStateBeMemoized,
           };
 
           return data;
@@ -1521,7 +1515,7 @@ export function attach(
     return true;
   }
 
-  function areHookInputsDeeplyEqual(
+  function canHookInputsBeMemoized(
     nextDeps: Array<mixed>,
     prevDeps: Array<mixed> | null,
   ) {
@@ -1578,20 +1572,17 @@ export function attach(
     return nextMemoizedState !== prevMemoizedState;
   }
 
-  function didHookDeeplyChange(prev: any, next: any): boolean {
+  function canHookBeMemoized(prev: any, next: any): boolean {
     const prevMemoizedState = prev.memoizedState;
     const nextMemoizedState = next.memoizedState;
 
     if (isEffect(prevMemoizedState) && isEffect(nextMemoizedState)) {
       return (
         prevMemoizedState !== nextMemoizedState &&
-        !areHookInputsDeeplyEqual(
-          nextMemoizedState.deps,
-          prevMemoizedState.deps,
-        )
+        canHookInputsBeMemoized(nextMemoizedState.deps, prevMemoizedState.deps)
       );
     }
-    return !isEqual(nextMemoizedState, prevMemoizedState);
+    return isEqual(nextMemoizedState, prevMemoizedState);
   }
 
   function didHooksChange(prev: any, next: any): boolean {
@@ -1658,7 +1649,7 @@ export function attach(
     return null;
   }
 
-  function getDeepChangedHooksIndices(
+  function getHooksNeedingMemoziation(
     prev: any,
     next: any,
   ): null | Array<number> {
@@ -1674,7 +1665,7 @@ export function attach(
     let index = 0;
     if (isHooksChange(next)) {
       while (next !== null) {
-        if (didHookDeeplyChange(prev, next)) {
+        if (canHookBeMemoized(prev, next)) {
           indices.push(index);
         }
         next = next.next;
@@ -1708,18 +1699,18 @@ export function attach(
     return changedKeys;
   }
 
-  function getDeepChangedKeys(prev: any, next: any): null | Array<string> {
+  function canObjectBeMemoized(prev: any, next: any): boolean {
     if (prev == null || next == null) {
-      return null;
+      return false;
     }
 
     // We can't report anything meaningful for hooks changes.
     if (isHooksChange(next)) {
-      return null;
+      return false;
     }
 
     const keys = new Set([...Object.keys(prev), ...Object.keys(next)]);
-    return Array.from(keys).filter(key => !isEqual(prev[key], next[key]));
+    return Array.from(keys).every(key => isEqual(prev[key], next[key]));
   }
 
   function isFunctionOrComponent(value: any) {

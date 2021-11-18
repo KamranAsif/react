@@ -52,15 +52,15 @@ export default function PerfInsight({fiberID}: Props) {
   const {
     isFirstMount,
     didContextChange,
-    didContextDeepChange,
+    canContextBeMemoized,
     didHooksChange,
-    didHooksDeeplyChange,
+    canAllChangedHooksBeMemoized,
     hooksNeedingMemoization,
     didPropsChange,
-    didPropsDeepChange,
+    canPropsBeMemoized,
     propsNeedingMemoization,
     didStateChange,
-    didStateDeepChange,
+    canStateBeMemoized,
   } = perfInsight;
 
   if (isFirstMount) {
@@ -69,7 +69,7 @@ export default function PerfInsight({fiberID}: Props) {
 
   const insights = [];
 
-  if (!didContextChange && didContextDeepChange) {
+  if (!didContextChange && canContextBeMemoized) {
     insights.push(
       <div key="context" className={styles.Item}>
         • Context deep value changed
@@ -101,15 +101,25 @@ export default function PerfInsight({fiberID}: Props) {
     ));
     insights.push(
       <div className={styles.Item}>
-        {didHooksDeeplyChange
-          ? '• Some hooks could avoid updating by using memoization:'
-          : '• This component could avoid updating by using memoization for hooks:'}
+        {canAllChangedHooksBeMemoized
+          ? '• Avoid this component rendering by using memoization for hooks:'
+          : '• Some hooks can be memoized to improve performance, but this component will still render.'}
         {hooksList}
       </div>,
     );
   }
 
-  if (didPropsChange && !didPropsDeepChange) {
+  const needsDeepPropsMemo = didPropsChange && canPropsBeMemoized;
+  const needsDeepStateMemo = didStateChange && canStateBeMemoized;
+
+  if (needsDeepStateMemo) {
+    insights.push(
+      <div className={styles.Item}>
+        • Use shouldComponentUpdate with deep equality to avoid this component
+        rendering.
+      </div>,
+    );
+  } else if (needsDeepPropsMemo) {
     insights.push(
       <div className={styles.Item}>
         • Use shouldComponentUpdate or React.Memo with deep equality to avoid
@@ -118,25 +128,15 @@ export default function PerfInsight({fiberID}: Props) {
     );
   }
 
-  if (didStateChange && !didStateDeepChange) {
-    insights.push(
-      <div className={styles.Item}>
-        • Use shouldComponentUpdate with deep equality to avoid this component
-        rendering.
-      </div>,
-    );
-  }
-
   if (propsNeedingMemoization != null && propsNeedingMemoization.length > 0) {
     insights.push(
       <div className={styles.Item}>
-        • Can't deep compare props:
+        • Consider memoizing the following props to avoid rendering.
         {propsNeedingMemoization.map(key => (
           <span key={key} className={styles.Key}>
             {key}
           </span>
         ))}
-        . Consider memorizing these to avoid rendering.
       </div>,
     );
   }
